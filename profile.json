@@ -1,0 +1,17 @@
+{
+  "user": {
+    "display_name": "Athmane"
+  },
+  "preferences": {
+    "tone": "simple",
+    "short_sentences": true
+  },
+  "context": {
+    "loved_ones": [],
+    "topics": [
+      "chat",
+      "souvenirs",
+      "sport"
+    ]
+  }
+}
