@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
+import html
 from dotenv import load_dotenv
 from config import DISPLAY_NAME, INSTANCE_LABEL, TIMEZONE, FEATURES, PROFILE_PATH
 from core.llm import generate_reply
@@ -27,13 +28,14 @@ def internal_send():
 
 @app.post("/whatsapp/webhook")
 def whatsapp_webhook():
-    # Webhook simplifié (POC) : ne vérifie pas la signature Twilio ici.
     incoming = request.form or request.json or {}
-    text = incoming.get("Body") or incoming.get("text") or ""
+    text = (incoming.get("Body") or incoming.get("text") or "").strip() or "Salut"
     profile = memory.get_profile()
     reply = generate_reply(text, profile)
-    # Ici tu appellerais Twilio pour renvoyer la réponse
-    return reply, 200
+
+    # -> renvoyer du TwiML que Twilio comprend
+    twiml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{html.escape(reply)}</Message></Response>'
+    return Response(twiml, mimetype="application/xml")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
