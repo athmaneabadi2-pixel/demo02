@@ -18,8 +18,11 @@ def health():
 
 @app.post("/internal/send")
 def internal_send():
-    # Sécurité simple par jeton
-    if request.headers.get("X-Token") != os.getenv("INTERNAL_TOKEN"):
+    expected = os.getenv("INTERNAL_TOKEN")
+    provided = request.headers.get("X-Token")
+
+    # Bloque si la variable n'existe pas OU si le header est absent/mauvais
+    if not expected or provided != expected:
         return jsonify({"error": "forbidden"}), 403
 
     data = request.json or {}
@@ -27,7 +30,6 @@ def internal_send():
     profile = memory.get_profile()
     reply = generate_reply(text, profile)
 
-    # Supporte ?format=text pour les checks simples
     if (request.args.get("format") or "").lower() == "text":
         return Response(reply, mimetype="text/plain; charset=utf-8"), 200
 
